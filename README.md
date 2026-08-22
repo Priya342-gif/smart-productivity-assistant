@@ -1,238 +1,278 @@
-# Life OS
+# 🚀 Life OS - Smart Productivity Assistant
 
-A personal decision-making and goal-tracking chatbot assistant — NOT a generic to-do app. Life OS is your personal decision engine + accountability counselor that remembers context and gives reasoned, personalized advice.
+> An AI-powered productivity system with custom focus timers, goal tracking, study analytics, voice interaction, and intelligent suggestions.
 
-## 🎯 What Makes Life OS Different
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Made with React](https://img.shields.io/badge/Made%20with-React-61DAFB?logo=react)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 
-- **Decision Memory System**: Every decision is stored with reasoning and referenced in future conversations
-- **Trade-Off Analysis**: Every suggestion includes visible trade-offs (e.g., "Prioritizing X means Y gets delayed by 2 hours")
-- **Counselor Personality**: Supportive, curious, non-judgmental tone — celebrates wins, reframes failures gently
-- **Goal Streaks with Grace Period**: Track daily habits with 1-day grace period option
-- **Conflict Detection**: Proactively flags scheduling conflicts before overwriting plans
-- **Context-Aware AI**: Claude reads your goals, past decisions, and notes before responding
+![Life OS Screenshot](https://via.placeholder.com/800x400/667eea/ffffff?text=Life+OS+-+Beautiful+Productivity+System)
 
-## 🛠️ Tech Stack
+---
 
-- **Frontend**: React + Tailwind CSS
-- **Backend**: Node.js/Express
-- **Database**: MongoDB with Mongoose ODM
-- **AI**: Claude API (Anthropic) for intelligent responses
-- **State**: Persistent storage per user
+## ✨ Features
 
-## 📋 Core Features
+### 🤖 AI-Powered Assistant
+- **Chat with Gemini AI** - Free Google Gemini 3.6 Flash model
+- **Voice Input** 🎤 - Speak your messages (speech-to-text)
+- **Voice Output** 🔊 - Listen to AI responses (text-to-speech)
+- **Context-Aware** - AI remembers your goals, mood, and patterns
+- **Smart Suggestions** - Pattern analysis and recommendations
 
-### 1. Main Chat Interface
-- Clean, minimal ChatGPT-style UI
-- AI analyzes priorities and gives time-blocked action plans
-- Every suggestion shows trade-offs
-- Conversation history persists across sessions
+### ⏱️ Custom Focus Timer
+- **Flexible Durations** - Choose 15, 25, 30, 45, 60, or 90 minutes
+- **Custom Input** - Set any duration from 1 to 180 minutes
+- **Pomodoro Mode** - Auto-switch between focus and break
+- **Visual Progress** - Beautiful animated circular timer
+- **Session Tracking** - Link sessions to specific goals
 
-### 2. Goals & Notes Panel
-- Slide-in side panel (🎯 icon)
-- Add goals with "why" reasoning
-- Daily checkbox + streak counter with 🔥 icon
-- Milestone celebrations (7-day, 30-day, 50-day streaks)
-- Simple notes section for journaling/reflections
+### 🎯 Goal Management
+- **Goal Tracking** - Add goals with reasons and motivation
+- **Streak System** - 🔥 Track consecutive days with grace period
+- **Daily Completion** - Check off goals each day
+- **Milestone Celebrations** - 7, 30, 50, 100+ day achievements
 
-### 3. Decision Memory System
-- Stores every decision with reasoning
-- MongoDB text search retrieves similar past decisions
-- Bot references past patterns naturally in conversation
+### 📊 Study Analytics
+- **10-Day Dashboard** - Visual bar chart of study time
+- **Daily Breakdown** - Click any day for detailed stats
+- **Goal-wise Time** - See time spent per goal
+- **Progress Metrics** - Total hours, averages, active days
 
-### 4. Conflict Detection
-- Flags when new tasks conflict with existing plans
-- Asks for priority before overwriting
+### 💡 Smart Features
+- **Daily Check-ins** ☀️🌙 - Morning priorities & evening reflections
+- **Mood Tracking** - Automatic emotion detection from messages
+- **Pattern Analysis** - Identifies struggling goals
+- **Proactive Suggestions** - AI-generated improvement tips
+- **Decision Memory** - Learns from your past choices
 
-### 5. Daily Check-in
-- Bot asks how yesterday went
-- Uses feedback to calibrate future suggestions
-- Gently explores reasons for missed goals (never guilt-trips)
+### 📝 Notes & Journaling
+- **Quick Notes** - Capture thoughts instantly
+- **Daily Reflections** - Journal your progress
+- **Searchable** - Find notes easily
 
-## 🚀 Getting Started
+---
+
+## 🎨 Beautiful UI
+
+- **Animated Gradients** - Smooth color transitions
+- **Glass-morphism** - Modern frosted glass effects
+- **Smooth Animations** - Fade, slide, and float effects
+- **Custom Scrollbar** - Gradient-styled scrolling
+- **Responsive Design** - Works on all devices
+- **Dark Accents** - Professional color scheme
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- MongoDB (running locally or MongoDB Atlas)
-- Anthropic API key (get from [Anthropic Console](https://console.anthropic.com/))
+- **Node.js** (v14 or higher)
+- **MongoDB Atlas** account (free)
+- **Google Gemini API** key (free)
 
 ### Installation
 
-1. **Clone and navigate to project**
-   ```bash
-   cd life-os
-   ```
+1. **Clone the repository**
+```bash
+git clone https://github.com/Priya342-gif/smart-productivity-assistant.git
+cd smart-productivity-assistant
+```
 
 2. **Install dependencies**
-   ```bash
-   npm run install-all
-   ```
-   This installs dependencies for both server and client.
+```bash
+npm install
+cd client && npm install
+cd ..
+```
 
 3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and add your credentials:
-   ```
-   MONGODB_URI=mongodb://localhost:27017/life-os
-   ANTHROPIC_API_KEY=your_claude_api_key_here
-   PORT=5000
-   NODE_ENV=development
-   ```
 
-4. **Start MongoDB**
-   
-   Make sure MongoDB is running locally:
-   ```bash
-   # On Windows (if installed as service)
-   net start MongoDB
-   
-   # On macOS/Linux
-   mongod
-   ```
-   
-   Or use MongoDB Atlas (cloud):
-   - Get connection string from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-   - Replace `MONGODB_URI` in `.env`
-
-5. **Run the application**
-   ```bash
-   npm run dev
-   ```
-   
-   This starts both:
-   - Backend server on `http://localhost:5000`
-   - React frontend on `http://localhost:3000`
-
-### Alternative: Run separately
-
-```bash
-# Terminal 1 - Backend
-npm run server
-
-# Terminal 2 - Frontend
-npm run client
+Create `.env` in root directory:
+```env
+MONGODB_URI=your_mongodb_connection_string
+GEMINI_API_KEY=your_gemini_api_key
+PORT=5000
+NODE_ENV=development
 ```
+
+Create `client/.env`:
+```env
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+4. **Initialize database**
+```bash
+npm run init-db
+```
+
+5. **Start the application**
+
+Backend:
+```bash
+npm start
+```
+
+Frontend (in new terminal):
+```bash
+cd client
+npm start
+```
+
+6. **Open your browser**
+```
+http://localhost:3000
+```
+
+---
+
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes
+- **[Feature Guide](NEW_FEATURES_COMPLETE.md)** - Complete feature documentation
+- **[UI Enhancements](UI_ENHANCEMENTS_COMPLETE.md)** - Design system details
+- **[Architecture](ARCHITECTURE.md)** - Technical architecture overview
+- **[API Documentation](QUICKSTART.md)** - Backend API reference
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React** - UI library
+- **Tailwind CSS** - Utility-first styling
+- **Axios** - HTTP client
+- **Web Speech API** - Voice input/output
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express** - Web framework
+- **MongoDB** - Database
+- **Mongoose** - ODM
+
+### AI & Services
+- **Google Gemini API** - AI chatbot (FREE)
+- **Speech Recognition API** - Voice input
+- **Speech Synthesis API** - Voice output
+
+---
 
 ## 📁 Project Structure
 
 ```
-life-os/
-├── server/
-│   ├── models/           # MongoDB schemas (User, Goal, Note, Decision, etc.)
-│   ├── routes/           # API endpoints
-│   ├── services/         # Business logic (streak calculation, Claude integration)
-│   └── server.js         # Express app entry point
-├── client/
+smart-productivity-assistant/
+├── client/                 # React frontend
 │   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── App.js        # Main app component
-│   │   └── index.css     # Tailwind styles
-│   └── package.json
-├── .env.example          # Environment variables template
-└── package.json          # Root package with scripts
+│   │   ├── components/    # React components
+│   │   ├── App.js         # Main app
+│   │   └── index.js       # Entry point
+│   └── public/            # Static files
+├── server/                # Node.js backend
+│   ├── models/            # MongoDB models
+│   ├── routes/            # API routes
+│   ├── services/          # Business logic
+│   └── server.js          # Server entry
+├── .env.example           # Environment template
+└── package.json           # Dependencies
 ```
 
-## 🗄️ Database Schema
+---
 
-### Collections
+## 🎯 Usage Examples
 
-- **users**: Basic user info (name, email)
-- **goals**: User goals with title, reason, active status
-- **goalLogs**: Daily completion logs for streak tracking
-- **notes**: Free-text notes (quick, reflection, task-linked)
-- **decisions**: Stored decisions with situation, action, reasoning
-- **conversations**: Chat message history
+### Set Custom Timer
+1. Click 🎯 icon → Timer tab
+2. Choose preset (15-90 min) or enter custom duration
+3. Select goal (optional)
+4. Click "Start Focus"
 
-### Text Indexes
+### Voice Interaction
+- **Input**: Click 🎤 microphone, speak your message
+- **Output**: Click 🔈 speaker icon on AI responses
 
-MongoDB text indexes enabled for:
-- `notes.text` — search notes
-- `decisions.situationSummary` and `decisions.reasoning` — find similar past decisions
+### Track Goals
+1. Click 🎯 icon → Goals tab
+2. Add goal with title and reason
+3. Check off daily when complete
+4. Watch your 🔥 streak grow
 
-## 🤖 AI Behavior
+### View Analytics
+- Click 🎯 icon → Stats tab
+- See 10-day bar chart
+- Click any day for details
 
-The Claude chatbot follows these rules:
+---
 
-1. **Always check context** (goals, past decisions, notes) before responding
-2. **Always show trade-offs** when suggesting plans
-3. **Always include time-blocked schedules** in action plans
-4. **Never be preachy** — ground advice in user's actual data
-5. **Ask "why"** when learning about new goals
-6. **Reference past decisions** when similar situations arise
-7. **Celebrate milestones** (7-day, 30-day streaks) with warm messages
-8. **Reframe failures gently** — suggest smaller versions instead of criticizing
+## 🔧 Configuration
 
-## 🎨 Design Philosophy
+### MongoDB Setup
+1. Create free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create cluster
+3. Get connection string
+4. Replace `<password>` with your password
 
-- **Clean, warm, non-corporate** — personal tool feel
-- **Mobile-responsive** design
-- **Integrated panel** — slides in from right, not a separate page
-- **Prominent streaks** — 🔥 icon + count visually highlighted
-- **Minimal friction** — quick actions, no unnecessary steps
+### Gemini API Key
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Create API key
+3. Copy and add to `.env`
 
-## 🔧 API Endpoints
+---
 
-### Users
-- `POST /api/users/auth` - Simple auth (get or create user)
-- `GET /api/users/:userId` - Get user info
+## 🤝 Contributing
 
-### Chat
-- `GET /api/chat/history/:userId` - Get conversation history
-- `POST /api/chat/message` - Send message, get AI response
-- `DELETE /api/chat/clear/:userId` - Clear conversation
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Goals
-- `GET /api/goals/:userId` - Get all goals with streaks
-- `POST /api/goals` - Create new goal
-- `POST /api/goals/:goalId/toggle` - Toggle daily completion
-- `DELETE /api/goals/:goalId` - Delete goal (soft delete)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### Notes
-- `GET /api/notes/:userId` - Get all notes
-- `POST /api/notes` - Create new note
-- `GET /api/notes/:userId/search?q=query` - Search notes
-- `DELETE /api/notes/:noteId` - Delete note
+---
 
-## 📝 MVP Scope
+## 📝 License
 
-This is v1 — focuses on core functionality:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-✅ Chat interface + Claude API integration  
-✅ Goals panel with add/mark-done/streak  
-✅ Simple notes section  
-✅ Basic decision memory (MongoDB text search)  
-✅ Streak calculation with grace period  
-✅ Milestone celebrations  
+---
 
-**Future enhancements** (not in v1):
-- Vector search with embeddings
-- Calendar integration
-- Push notifications
-- Multi-user sharing
-- Advanced analytics
+## 🌟 Features Roadmap
 
-## 🐛 Troubleshooting
+- [ ] Mobile app (PWA)
+- [ ] Calendar integration
+- [ ] Data export (CSV/PDF)
+- [ ] Dark mode toggle
+- [ ] Goal categories
+- [ ] Weekly/monthly reports
+- [ ] Social accountability
+- [ ] Browser extension
 
-**MongoDB connection error**
-- Ensure MongoDB is running: `mongod` or service is started
-- Check `MONGODB_URI` in `.env`
+---
 
-**Claude API errors**
-- Verify `ANTHROPIC_API_KEY` in `.env`
-- Check API key is valid on Anthropic Console
-- Ensure you have API credits
+## 🙏 Acknowledgments
 
-**Port already in use**
-- Change `PORT` in `.env` (default: 5000)
-- Or kill process using port: `npx kill-port 5000`
+- **Google Gemini** for free AI API
+- **MongoDB Atlas** for free database hosting
+- **Tailwind CSS** for beautiful styling
+- **React** community for awesome tools
 
-## 📄 License
+---
 
-MIT License - feel free to use and modify for personal projects.
+## 📞 Support
 
-## 🙏 Credits
+If you have any questions or issues, please:
+- Open an [Issue](https://github.com/Priya342-gif/smart-productivity-assistant/issues)
+- Check the [Documentation](QUICK_START.md)
+- Contact: [Your Email]
 
-Built with Claude Sonnet 4.5 as a personal productivity tool focused on thoughtful decision-making rather than checkbox completion.
+---
+
+## ⭐ Star this repo if you find it helpful!
+
+Made with ❤️ and ☕ by [Priya342-gif](https://github.com/Priya342-gif)
+
+---
+
+**Happy Productivity!** 🚀✨
