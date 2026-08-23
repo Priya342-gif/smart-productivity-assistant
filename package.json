@@ -11,7 +11,8 @@
     "install-all": "npm install && cd client && npm install",
     "init-db": "node server/scripts/initDatabase.js",
     "build": "cd client && npm run build",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build",
+    "render-build": "npm install && cd client && npm install && npm run build"
   },
   "keywords": [
     "chatbot",

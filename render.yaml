@@ -1,0 +1,26 @@
+services:
+  # Backend API
+  - type: web
+    name: life-os-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # Frontend (Static Site)
+  - type: web
+    name: life-os-frontend
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://life-os-backend.onrender.com/api
