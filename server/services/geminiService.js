@@ -166,65 +166,114 @@ function formatContextForClaude(context) {
  * Get chatbot response using Google Gemini
  */
 async function getChatResponse(userId, userMessage, conversationHistory = []) {
-  // Extract and log mood from user message
   try {
-    const { mood, energy } = extractMoodFromText(userMessage);
-    const moodLog = new MoodLog({
-      userId,
-      mood,
-      energyLevel: energy,
-      context: userMessage.substring(0, 500)
+    // Extract and log mood from user message
+    try {
+      const { mood, energy } = extractMoodFromText(userMessage);
+      const moodLog = new MoodLog({
+        userId,
+        mood,
+        energyLevel: energy,
+        context: userMessage.substring(0, 500)
+      });
+      await moodLog.save();
+    } catch (err) {
+      console.error('Error logging mood:', err);
+      // Continue even if mood logging fails
+    }
+    
+    // Get user context
+    const context = await getUserContext(userId);
+    
+    // Search for similar past decisions
+    const similarDecisions = await findSimilarDecisions(userId, userMessage);
+    if (similarDecisions.length > 0) {
+      context.similarDecisions = similarDecisions;
+    }
+    
+    // Format context
+    const contextText = formatContextForClaude(context);
+    
+    // Build conversation history for Gemini
+    const historyForGemini = conversationHistory.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+    
+    // Initialize Gemini model (using free tier model)
+    // Try multiple model names in case one doesn't work
+    let model;
+    const modelNames = [
+      "gemini-1.5-flash",
+      "gemini-1.5-flash-latest", 
+      "gemini-pro",
+      "gemini-1.5-pro"
+    ];
+    
+    try {
+      model = genAI.getGenerativeModel({ 
+        model: modelNames[0], // Try gemini-1.5-flash first
+        systemInstruction: SYSTEM_PROMPT
+      });
+    } catch (modelError) {
+      console.error(`Failed to initialize model ${modelNames[0]}, trying alternatives...`);
+      // Try alternative models
+      for (let i = 1; i < modelNames.length; i++) {
+        try {
+          model = genAI.getGenerativeModel({ 
+            model: modelNames[i],
+            systemInstruction: SYSTEM_PROMPT
+          });
+          console.log(`Successfully initialized with model: ${modelNames[i]}`);
+          break;
+        } catch (err) {
+          console.error(`Model ${modelNames[i]} also failed:`, err.message);
+        }
+      }
+      
+      if (!model) {
+        throw new Error('Failed to initialize any Gemini model. Check API key and model availability.');
+      }
+    }
+    
+    // Create chat session with history
+    const chat = model.startChat({
+      history: historyForGemini,
+      generationConfig: {
+        maxOutputTokens: 2000,
+        temperature: 0.7,
+      },
     });
-    await moodLog.save();
-  } catch (err) {
-    console.error('Error logging mood:', err);
-    // Continue even if mood logging fails
+    
+    // Send message with context
+    const fullMessage = contextText + '\n' + userMessage;
+    console.log('Sending message to Gemini...');
+    const result = await chat.sendMessage(fullMessage);
+    const response = await result.response;
+    const assistantMessage = response.text();
+    console.log('Received response from Gemini');
+    
+    // Try to detect if this was a decision-making conversation
+    // and save it (simplified heuristic for MVP)
+    await tryExtractAndSaveDecision(userId, userMessage, assistantMessage);
+    
+    return assistantMessage;
+  } catch (error) {
+    console.error('Error in getChatResponse:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Return a more helpful error message
+    if (error.message.includes('API key')) {
+      throw new Error('Gemini API key error. Please check your API key configuration.');
+    } else if (error.message.includes('quota') || error.message.includes('limit')) {
+      throw new Error('API quota exceeded. Please try again later.');
+    } else if (error.message.includes('model')) {
+      throw new Error('Model initialization failed. The Gemini model may be unavailable.');
+    }
+    
+    throw new Error(`AI service error: ${error.message}`);
   }
-  
-  // Get user context
-  const context = await getUserContext(userId);
-  
-  // Search for similar past decisions
-  const similarDecisions = await findSimilarDecisions(userId, userMessage);
-  if (similarDecisions.length > 0) {
-    context.similarDecisions = similarDecisions;
-  }
-  
-  // Format context
-  const contextText = formatContextForClaude(context);
-  
-  // Build conversation history for Gemini
-  const historyForGemini = conversationHistory.map(msg => ({
-    role: msg.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: msg.content }]
-  }));
-  
-  // Initialize Gemini model (using free tier model)
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_PROMPT
-  });
-  
-  // Create chat session with history
-  const chat = model.startChat({
-    history: historyForGemini,
-    generationConfig: {
-      maxOutputTokens: 2000,
-      temperature: 0.7,
-    },
-  });
-  
-  // Send message with context
-  const fullMessage = contextText + '\n' + userMessage;
-  const result = await chat.sendMessage(fullMessage);
-  const response = await result.response;
-  const assistantMessage = response.text();
-  
-  // Try to detect if this was a decision-making conversation
-  // and save it (simplified heuristic for MVP)
-  await tryExtractAndSaveDecision(userId, userMessage, assistantMessage);
-  
-  return assistantMessage;
 }
 
 /**

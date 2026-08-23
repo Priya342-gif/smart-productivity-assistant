@@ -66,7 +66,12 @@ router.post('/message', async (req, res) => {
     });
   } catch (error) {
     console.error('Error processing message:', error);
-    res.status(500).json({ error: 'Failed to process message' });
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to process message',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
