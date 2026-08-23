@@ -9,10 +9,21 @@ const { extractMoodFromText } = require('./analyticsService');
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
   console.error('❌ GEMINI_API_KEY not found in environment variables!');
+  throw new Error('GEMINI_API_KEY environment variable is required');
 }
-console.log('✅ Gemini API Key loaded:', apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING');
+console.log('✅ Gemini API Key loaded:', `${apiKey.substring(0, 10)}...`);
 
 const genAI = new GoogleGenerativeAI(apiKey);
+
+// Current supported model names (as of 2026)
+const SUPPORTED_MODELS = [
+  'gemini-2.0-flash-exp',  // Latest experimental flash model
+  'gemini-1.5-flash',      // Stable flash model (most reliable)
+  'gemini-1.5-pro'         // Stable pro model
+];
+
+let cachedModel = null;
+let cachedModelName = null;
 
 const SYSTEM_PROMPT = `You are a personal decision counselor and accountability partner for Life OS. Your role is to help users make better decisions, prioritize tasks, and stay accountable to their goals.
 
@@ -43,6 +54,61 @@ MILESTONES:
 
 Remember: This is a personal tool, not enterprise software. Users trust you to remember everything and give honest, contextual advice.`;
 
+/**
+ * Initialize and verify a Gemini model
+ * This actually tests the model with a real API call to catch auth/model errors early
+ */
+async function initializeModel() {
+  if (cachedModel && cachedModelName) {
+    console.log(`✅ Using cached model: ${cachedModelName}`);
+    return { model: cachedModel, modelName: cachedModelName };
+  }
+
+  console.log('🔄 Initializing Gemini model...');
+  
+  for (const modelName of SUPPORTED_MODELS) {
+    try {
+      console.log(`   Trying model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      
+      // CRITICAL: Test the model with a real API call to verify it works
+      // This catches bad model names, auth errors, and quota issues immediately
+      console.log(`   Testing ${modelName} with real API call...`);
+      const testResult = await model.generateContent('Test');
+      const response = await testResult.response;
+      const text = response.text();
+      
+      if (!text) {
+        throw new Error('Model returned empty response');
+      }
+      
+      console.log(`✅ Model verified and working: ${modelName}`);
+      
+      // Cache the working model
+      cachedModel = model;
+      cachedModelName = modelName;
+      
+      return { model, modelName };
+    } catch (err) {
+      console.error(`❌ Model ${modelName} failed:`, err.message);
+      
+      // Provide helpful error messages
+      if (err.message.includes('401') || err.message.includes('Unauthorized')) {
+        console.error('   → This looks like an API key issue or model deprecation');
+      } else if (err.message.includes('404') || err.message.includes('Not Found')) {
+        console.error('   → This model name is not available');
+      } else if (err.message.includes('quota') || err.message.includes('limit')) {
+        console.error('   → API quota exceeded');
+      }
+    }
+  }
+  
+  // If we get here, all models failed
+  throw new Error(
+    `Failed to initialize any Gemini model. Tried: ${SUPPORTED_MODELS.join(', ')}. ` +
+    'Check your API key, network connection, and that Gemini API is enabled in your Google Cloud project.'
+  );
+}
 
 /**
  * Get relevant context for the chatbot
@@ -105,14 +171,13 @@ async function findSimilarDecisions(userId, query) {
     
     return decisions;
   } catch (error) {
-    // If text search fails, return empty array
     console.error('Text search error:', error);
     return [];
   }
 }
 
 /**
- * Format context for Claude
+ * Format context for AI
  */
 function formatContextForClaude(context) {
   let contextText = '\n=== USER CONTEXT ===\n';
@@ -138,7 +203,6 @@ function formatContextForClaude(context) {
     contextText += `Latest mood: ${latestMood.mood} (Energy: ${latestMood.energyLevel}/10)\n`;
     contextText += `Recent average energy: ${avgEnergy.toFixed(1)}/10\n`;
     
-    // Check for stress patterns
     const stressedCount = context.recentMoods.filter(m => m.mood === 'stressed' || m.mood === 'anxious').length;
     if (stressedCount > context.recentMoods.length * 0.3) {
       contextText += `⚠️ User has been stressed/anxious recently - be extra supportive and gentle.\n`;
@@ -186,7 +250,6 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
       await moodLog.save();
     } catch (err) {
       console.error('Error logging mood:', err);
-      // Continue even if mood logging fails
     }
     
     // Get user context
@@ -201,41 +264,15 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
     // Format context
     const contextText = formatContextForClaude(context);
     
+    // Initialize model (with real API verification)
+    const { model, modelName } = await initializeModel();
+    console.log(`📤 Sending message to Gemini (model: ${modelName})...`);
+    
     // Build conversation history for Gemini
     const historyForGemini = conversationHistory.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }]
     }));
-    
-    // Initialize Gemini model
-    console.log('Initializing Gemini model...');
-    
-    // Try different model names
-    const modelsToTry = [
-      "gemini-pro",
-      "gemini-1.5-pro", 
-      "gemini-1.5-flash-latest",
-      "models/gemini-pro"
-    ];
-    
-    let model = null;
-    let lastError = null;
-    
-    for (const modelName of modelsToTry) {
-      try {
-        console.log(`Trying model: ${modelName}`);
-        model = genAI.getGenerativeModel({ model: modelName });
-        console.log(`✅ Successfully initialized model: ${modelName}`);
-        break;
-      } catch (err) {
-        console.error(`❌ Failed to initialize ${modelName}:`, err.message);
-        lastError = err;
-      }
-    }
-    
-    if (!model) {
-      throw new Error(`Failed to initialize any Gemini model. Last error: ${lastError?.message}`);
-    }
     
     // Create chat session with history and system instruction
     const chat = model.startChat({
@@ -258,29 +295,34 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
     
     // Send message with context
     const fullMessage = contextText + '\n' + userMessage;
-    console.log('Sending message to Gemini...');
     const result = await chat.sendMessage(fullMessage);
     const response = await result.response;
     const assistantMessage = response.text();
-    console.log('Received response from Gemini');
+    
+    console.log('✅ Received response from Gemini');
     
     // Try to detect if this was a decision-making conversation
-    // and save it (simplified heuristic for MVP)
     await tryExtractAndSaveDecision(userId, userMessage, assistantMessage);
     
     return assistantMessage;
   } catch (error) {
-    console.error('Error in getChatResponse:', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('❌ Error in getChatResponse:', error);
+    console.error('   Error message:', error.message);
+    console.error('   Error stack:', error.stack);
     
-    // Return a more helpful error message
+    // Clear cached model on error so next request tries again
+    cachedModel = null;
+    cachedModelName = null;
+    
+    // Return helpful error messages
     if (error.message.includes('API key')) {
       throw new Error('Gemini API key error. Please check your API key configuration.');
+    } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+      throw new Error('Gemini API authentication failed. Your API key may be invalid, expired, or the model may be deprecated. Please check your API key and try again.');
     } else if (error.message.includes('quota') || error.message.includes('limit')) {
       throw new Error('API quota exceeded. Please try again later.');
-    } else if (error.message.includes('model')) {
-      throw new Error('Model initialization failed. The Gemini model may be unavailable.');
+    } else if (error.message.includes('404') || error.message.includes('Not Found')) {
+      throw new Error('The requested Gemini model is not available. Please contact support.');
     }
     
     throw new Error(`AI service error: ${error.message}`);
@@ -289,10 +331,8 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
 
 /**
  * Extract and save decision if detected
- * This is a simple heuristic - can be improved with better parsing
  */
 async function tryExtractAndSaveDecision(userId, userMessage, assistantMessage) {
-  // Check if the conversation looks like decision-making
   const decisionKeywords = [
     'prioritize', 'schedule', 'plan', 'decide', 'choose',
     'action plan', 'should i', 'what should', 'time block'
@@ -304,10 +344,9 @@ async function tryExtractAndSaveDecision(userId, userMessage, assistantMessage) 
   );
   
   if (isDecisionConversation && assistantMessage.length > 100) {
-    // Extract reasoning (simplified - look for explanations)
     const decision = new Decision({
       userId,
-      situationSummary: userMessage.substring(0, 500), // Truncate if too long
+      situationSummary: userMessage.substring(0, 500),
       chosenAction: assistantMessage.substring(0, 500),
       reasoning: assistantMessage.substring(0, 1000)
     });
