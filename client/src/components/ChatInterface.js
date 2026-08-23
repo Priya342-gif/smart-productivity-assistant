@@ -9,7 +9,9 @@ function ChatInterface({ user }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -31,6 +33,15 @@ function ChatInterface({ user }) {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToTop = () => {
+    messagesContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleScroll = (e) => {
+    const scrollTop = e.target.scrollTop;
+    setShowScrollTop(scrollTop > 300);
   };
 
   const handleSend = async () => {
@@ -95,9 +106,27 @@ function ChatInterface({ user }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full h-full overflow-hidden relative">
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 p-3 bg-warm-gray-800 text-white rounded-full shadow-lg hover:bg-warm-gray-700 transition-all hover:scale-110"
+          title="Scroll to top"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      )}
+      
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-6" 
+        style={{ scrollBehavior: 'smooth' }}
+      >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">

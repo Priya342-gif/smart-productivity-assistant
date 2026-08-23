@@ -143,7 +143,7 @@ function App() {
 
       {/* Main content */}
       <div className="flex-1 flex relative overflow-hidden">
-        <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-sm">
+        <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-sm overflow-hidden">
           {/* Debug indicator */}
           {showPanel && (
             <div className="fixed top-20 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs z-50">
