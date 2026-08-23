@@ -209,10 +209,33 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
     
     // Initialize Gemini model
     console.log('Initializing Gemini model...');
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash"
-    });
-    console.log('✅ Model initialized successfully');
+    
+    // Try different model names
+    const modelsToTry = [
+      "gemini-pro",
+      "gemini-1.5-pro", 
+      "gemini-1.5-flash-latest",
+      "models/gemini-pro"
+    ];
+    
+    let model = null;
+    let lastError = null;
+    
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Trying model: ${modelName}`);
+        model = genAI.getGenerativeModel({ model: modelName });
+        console.log(`✅ Successfully initialized model: ${modelName}`);
+        break;
+      } catch (err) {
+        console.error(`❌ Failed to initialize ${modelName}:`, err.message);
+        lastError = err;
+      }
+    }
+    
+    if (!model) {
+      throw new Error(`Failed to initialize any Gemini model. Last error: ${lastError?.message}`);
+    }
     
     // Create chat session with history and system instruction
     const chat = model.startChat({
