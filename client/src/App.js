@@ -79,7 +79,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-blue-50 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-blue-50 flex flex-col">
       {/* Daily Check-in Modal */}
       {checkInType && (
         <DailyCheckIn 
@@ -88,8 +88,8 @@ function App() {
         />
       )}
       
-      {/* Header */}
-      <div className="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between shadow-lg relative z-50">
+      {/* Header - Fixed */}
+      <div className="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between shadow-lg flex-shrink-0 z-50">
         <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
           <span className="text-3xl">🚀</span>
           Life OS
@@ -141,9 +141,9 @@ function App() {
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex relative overflow-hidden">
-        <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-sm overflow-hidden">
+      {/* Main content - Scrollable area */}
+      <div className="flex-1 flex relative min-h-0">
+        <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-sm min-h-0">
           {/* Debug indicator */}
           {showPanel && (
             <div className="fixed top-20 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs z-50">

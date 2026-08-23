@@ -106,7 +106,7 @@ function ChatInterface({ user }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full h-full overflow-hidden relative">
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
       {/* Scroll to Top Button */}
       {showScrollTop && (
         <button
@@ -120,7 +120,7 @@ function ChatInterface({ user }) {
         </button>
       )}
       
-      {/* Messages area */}
+      {/* Messages area - Scrollable */}
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
@@ -193,8 +193,8 @@ function ChatInterface({ user }) {
         )}
       </div>
 
-      {/* Input area */}
-      <div className="border-t border-warm-gray-200 bg-white px-4 py-4">
+      {/* Input area - Fixed at bottom */}
+      <div className="border-t border-warm-gray-200 bg-white px-4 py-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex gap-3">
           <VoiceInput 
             onTranscript={handleVoiceTranscript}
