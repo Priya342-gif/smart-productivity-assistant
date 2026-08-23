@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
-const { getChatResponse } = require('../services/geminiService');
+const { getChatResponse } = require('../services/groqService');
 
 // Get conversation history
 router.get('/history/:userId', async (req, res) => {
