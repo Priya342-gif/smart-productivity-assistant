@@ -9,7 +9,9 @@ function ChatInterface({ user }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -19,8 +21,10 @@ function ChatInterface({ user }) {
   }, [user]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (shouldAutoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, shouldAutoScroll]);
 
   const loadHistory = async () => {
     try {
@@ -35,11 +39,24 @@ function ChatInterface({ user }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    
+    // Only auto-scroll if user is near the bottom
+    setShouldAutoScroll(isNearBottom);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
     setInput('');
+    
+    // Enable auto-scroll when sending a new message
+    setShouldAutoScroll(true);
     
     // Add user message immediately
     setMessages(prev => [...prev, {
@@ -95,7 +112,11 @@ function ChatInterface({ user }) {
   return (
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
+      >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
