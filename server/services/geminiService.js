@@ -5,7 +5,14 @@ const Note = require('../models/Note');
 const MoodLog = require('../models/MoodLog');
 const { extractMoodFromText } = require('./analyticsService');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize Gemini with API key
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error('❌ GEMINI_API_KEY not found in environment variables!');
+}
+console.log('✅ Gemini API Key loaded:', apiKey ? `${apiKey.substring(0, 10)}...` : 'MISSING');
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 const SYSTEM_PROMPT = `You are a personal decision counselor and accountability partner for Life OS. Your role is to help users make better decisions, prioritize tasks, and stay accountable to their goals.
 
@@ -200,45 +207,26 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
       parts: [{ text: msg.content }]
     }));
     
-    // Initialize Gemini model (using free tier model)
-    // Try multiple model names in case one doesn't work
-    let model;
-    const modelNames = [
-      "gemini-1.5-flash",
-      "gemini-1.5-flash-latest", 
-      "gemini-pro",
-      "gemini-1.5-pro"
-    ];
+    // Initialize Gemini model
+    console.log('Initializing Gemini model...');
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash"
+    });
+    console.log('✅ Model initialized successfully');
     
-    try {
-      model = genAI.getGenerativeModel({ 
-        model: modelNames[0], // Try gemini-1.5-flash first
-        systemInstruction: SYSTEM_PROMPT
-      });
-    } catch (modelError) {
-      console.error(`Failed to initialize model ${modelNames[0]}, trying alternatives...`);
-      // Try alternative models
-      for (let i = 1; i < modelNames.length; i++) {
-        try {
-          model = genAI.getGenerativeModel({ 
-            model: modelNames[i],
-            systemInstruction: SYSTEM_PROMPT
-          });
-          console.log(`Successfully initialized with model: ${modelNames[i]}`);
-          break;
-        } catch (err) {
-          console.error(`Model ${modelNames[i]} also failed:`, err.message);
-        }
-      }
-      
-      if (!model) {
-        throw new Error('Failed to initialize any Gemini model. Check API key and model availability.');
-      }
-    }
-    
-    // Create chat session with history
+    // Create chat session with history and system instruction
     const chat = model.startChat({
-      history: historyForGemini,
+      history: [
+        {
+          role: 'user',
+          parts: [{ text: SYSTEM_PROMPT }]
+        },
+        {
+          role: 'model',
+          parts: [{ text: 'Understood. I will act as your personal decision counselor and accountability partner, helping you make better decisions based on your goals, past decisions, and context.' }]
+        },
+        ...historyForGemini
+      ],
       generationConfig: {
         maxOutputTokens: 2000,
         temperature: 0.7,
