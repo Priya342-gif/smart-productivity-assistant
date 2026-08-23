@@ -9,10 +9,10 @@ function ChatInterface({ user }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
+  const userScrolledUp = useRef(false);
 
   useEffect(() => {
     if (user) {
@@ -21,10 +21,11 @@ function ChatInterface({ user }) {
   }, [user]);
 
   useEffect(() => {
-    if (shouldAutoScroll) {
+    // Only auto-scroll if user hasn't manually scrolled up
+    if (!userScrolledUp.current) {
       scrollToBottom();
     }
-  }, [messages, shouldAutoScroll]);
+  }, [messages]);
 
   const loadHistory = async () => {
     try {
@@ -43,10 +44,14 @@ function ChatInterface({ user }) {
     if (!messagesContainerRef.current) return;
     
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     
-    // Only auto-scroll if user is near the bottom
-    setShouldAutoScroll(isNearBottom);
+    // User scrolled up if they're more than 50px from bottom
+    if (distanceFromBottom > 50) {
+      userScrolledUp.current = true;
+    } else {
+      userScrolledUp.current = false;
+    }
   };
 
   const handleSend = async () => {
@@ -55,8 +60,8 @@ function ChatInterface({ user }) {
     const userMessage = input.trim();
     setInput('');
     
-    // Enable auto-scroll when sending a new message
-    setShouldAutoScroll(true);
+    // Reset scroll lock when sending a new message
+    userScrolledUp.current = false;
     
     // Add user message immediately
     setMessages(prev => [...prev, {
