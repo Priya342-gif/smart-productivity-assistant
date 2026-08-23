@@ -17,14 +17,14 @@ const groq = new Groq({ apiKey });
 
 // Available Groq models (all free!)
 const AVAILABLE_MODELS = [
-  'llama-3.3-70b-versatile',  // Best quality, versatile
-  'llama-3.1-70b-versatile',  // Great quality
+  'llama-3.1-70b-versatile',  // Best quality, versatile
   'mixtral-8x7b-32768',       // Good for long context
   'llama3-70b-8192',          // Fast and reliable
+  'gemma2-9b-it',             // Google's Gemma model
   'llama3-8b-8192'            // Fastest
 ];
 
-const DEFAULT_MODEL = AVAILABLE_MODELS[0]; // Using best model
+const DEFAULT_MODEL = AVAILABLE_MODELS[0]; // Using llama-3.1-70b-versatile
 
 const SYSTEM_PROMPT = `You are a personal decision counselor and accountability partner for Life OS. Your role is to help users make better decisions, prioritize tasks, and stay accountable to their goals.
 
@@ -224,15 +224,34 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
     
     console.log(`📤 Sending to Groq (model: ${DEFAULT_MODEL})...`);
     
-    // Call Groq API
-    const completion = await groq.chat.completions.create({
-      messages,
-      model: DEFAULT_MODEL,
-      temperature: 0.7,
-      max_tokens: 2000,
-      top_p: 1,
-      stream: false
-    });
+    // Call Groq API with fallback to other models if first fails
+    let completion;
+    let lastError;
+    
+    for (const model of AVAILABLE_MODELS) {
+      try {
+        console.log(`Trying model: ${model}...`);
+        completion = await groq.chat.completions.create({
+          messages,
+          model: model,
+          temperature: 0.7,
+          max_tokens: 2000,
+          top_p: 1,
+          stream: false
+        });
+        console.log(`✅ Success with model: ${model}`);
+        break; // Success, exit loop
+      } catch (err) {
+        console.log(`❌ Model ${model} failed:`, err.message);
+        lastError = err;
+        // Try next model
+        continue;
+      }
+    }
+    
+    if (!completion) {
+      throw lastError || new Error('All models failed');
+    }
     
     const assistantMessage = completion.choices[0]?.message?.content || 'Sorry, I encountered an error.';
     
