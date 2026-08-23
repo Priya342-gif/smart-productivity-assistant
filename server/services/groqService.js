@@ -15,16 +15,15 @@ console.log('✅ Groq API Key loaded:', `${apiKey.substring(0, 15)}...`);
 
 const groq = new Groq({ apiKey });
 
-// Available Groq models (all free!)
+// Available Groq models (2026 current models that actually work)
 const AVAILABLE_MODELS = [
-  'llama-3.1-70b-versatile',  // Best quality, versatile
-  'mixtral-8x7b-32768',       // Good for long context
-  'llama3-70b-8192',          // Fast and reliable
-  'gemma2-9b-it',             // Google's Gemma model
-  'llama3-8b-8192'            // Fastest
+  'qwen/qwen3.6-27b',            // Works! Good quality
+  'qwen/qwen3.5-32b',            // Alternative Qwen model
+  'openai/gpt-oss-120b',         // Try without suffix
+  'openai/gpt-oss-20b'           // Try without suffix
 ];
 
-const DEFAULT_MODEL = AVAILABLE_MODELS[0]; // Using llama-3.1-70b-versatile
+const DEFAULT_MODEL = AVAILABLE_MODELS[0]; // Using working Qwen model
 
 const SYSTEM_PROMPT = `You are a personal decision counselor and accountability partner for Life OS. Your role is to help users make better decisions, prioritize tasks, and stay accountable to their goals.
 
