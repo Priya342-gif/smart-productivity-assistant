@@ -254,12 +254,15 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
     
     const assistantMessage = completion.choices[0]?.message?.content || 'Sorry, I encountered an error.';
     
+    // Remove <think> tags and their content (Qwen model shows reasoning)
+    const cleanMessage = assistantMessage.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    
     console.log('✅ Received response from Groq');
     
     // Try to save as decision if relevant
-    await tryExtractAndSaveDecision(userId, userMessage, assistantMessage);
+    await tryExtractAndSaveDecision(userId, userMessage, cleanMessage);
     
-    return assistantMessage;
+    return cleanMessage;
   } catch (error) {
     console.error('❌ Error in getChatResponse:', error);
     console.error('   Error message:', error.message);
