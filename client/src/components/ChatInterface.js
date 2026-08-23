@@ -10,9 +10,7 @@ function ChatInterface({ user }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
-  const userScrolledUp = useRef(false);
 
   useEffect(() => {
     if (user) {
@@ -20,12 +18,7 @@ function ChatInterface({ user }) {
     }
   }, [user]);
 
-  useEffect(() => {
-    // Only auto-scroll if user hasn't manually scrolled up
-    if (!userScrolledUp.current) {
-      scrollToBottom();
-    }
-  }, [messages]);
+  // Remove auto-scroll on every message change
 
   const loadHistory = async () => {
     try {
@@ -40,28 +33,11 @@ function ChatInterface({ user }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleScroll = () => {
-    if (!messagesContainerRef.current) return;
-    
-    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    
-    // User scrolled up if they're more than 50px from bottom
-    if (distanceFromBottom > 50) {
-      userScrolledUp.current = true;
-    } else {
-      userScrolledUp.current = false;
-    }
-  };
-
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
     setInput('');
-    
-    // Reset scroll lock when sending a new message
-    userScrolledUp.current = false;
     
     // Add user message immediately
     setMessages(prev => [...prev, {
@@ -83,6 +59,9 @@ function ChatInterface({ user }) {
         content: response.data.response,
         timestamp: response.data.timestamp
       }]);
+      
+      // Only scroll after bot responds
+      setTimeout(() => scrollToBottom(), 100);
     } catch (err) {
       console.error('Error sending message:', err);
       setMessages(prev => [...prev, {
@@ -90,6 +69,7 @@ function ChatInterface({ user }) {
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date()
       }]);
+      setTimeout(() => scrollToBottom(), 100);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -117,11 +97,7 @@ function ChatInterface({ user }) {
   return (
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
       {/* Messages area */}
-      <div 
-        ref={messagesContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
-      >
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
