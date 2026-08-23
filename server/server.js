@@ -55,19 +55,32 @@ app.get('/api/test', (req, res) => {
 // Serve static files from React app in production
 const path = require('path');
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  // Only serve static files if they exist (for single-server deployment)
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  const fs = require('fs');
   
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-    }
-  });
+  if (fs.existsSync(clientBuildPath)) {
+    app.use(express.static(clientBuildPath));
+    
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/health')) {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+      }
+    });
+  }
+  // If client build doesn't exist, this is a separate backend deployment - do nothing
 }
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  console.error('Error occurred:');
+  console.error('Path:', req.path);
+  console.error('Method:', req.method);
+  console.error('Error:', err.stack);
+  res.status(500).json({ 
+    error: 'Something went wrong!',
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+  });
 });
 
 const PORT = process.env.PORT || 5000;
