@@ -24,7 +24,10 @@ router.post('/message', async (req, res) => {
   try {
     const { userId, message } = req.body;
     
+    console.log('📥 Received chat message:', { userId, message: message?.substring(0, 50) });
+    
     if (!userId || !message) {
+      console.error('❌ Missing userId or message');
       return res.status(400).json({ error: 'userId and message are required' });
     }
     
@@ -47,8 +50,12 @@ router.post('/message', async (req, res) => {
       content: msg.content
     }));
     
+    console.log('🤖 Getting bot response...');
+    
     // Get bot response
     const botResponse = await getChatResponse(userId, message, recentMessages.slice(0, -1));
+    
+    console.log('✅ Got bot response, saving to database...');
     
     // Add assistant message
     conversation.messages.push({
@@ -60,17 +67,20 @@ router.post('/message', async (req, res) => {
     conversation.updatedAt = new Date();
     await conversation.save();
     
+    console.log('✅ Response sent to client');
+    
     res.json({ 
       response: botResponse,
       timestamp: new Date()
     });
   } catch (error) {
-    console.error('Error processing message:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('❌ Error processing message:', error);
+    console.error('   Error message:', error.message);
+    console.error('   Error stack:', error.stack);
     res.status(500).json({ 
       error: 'Failed to process message',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
