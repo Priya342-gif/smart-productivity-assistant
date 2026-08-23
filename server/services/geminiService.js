@@ -201,7 +201,7 @@ async function getChatResponse(userId, userMessage, conversationHistory = []) {
   
   // Initialize Gemini model (using free tier model)
   const model = genAI.getGenerativeModel({ 
-    model: "gemini-3.6-flash",
+    model: "gemini-1.5-flash",
     systemInstruction: SYSTEM_PROMPT
   });
   
