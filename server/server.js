@@ -7,7 +7,12 @@ const bodyParser = require('body-parser');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -29,7 +34,22 @@ app.use('/api/analytics', require('./routes/analytics'));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Life OS server is running' });
+  res.json({ 
+    status: 'ok', 
+    message: 'Life OS server is running',
+    timestamp: new Date(),
+    env: process.env.NODE_ENV,
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// Test API endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'API is working!',
+    timestamp: new Date()
+  });
 });
 
 // Serve static files from React app in production
