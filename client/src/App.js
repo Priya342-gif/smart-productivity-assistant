@@ -85,15 +85,20 @@ function App() {
             Hi, {user?.name} ✨
           </span>
           <button
-            onClick={() => setShowPanel(!showPanel)}
-            className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            onClick={() => {
+              console.log('Panel button clicked! Current state:', showPanel);
+              setShowPanel(!showPanel);
+            }}
+            className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer z-50"
             title="Goals & Tools"
+            type="button"
           >
-            <span className="text-2xl">🎯</span>
+            <span className="text-2xl pointer-events-none">🎯</span>
           </button>
           <button
             onClick={handleLogout}
-            className="text-sm text-gray-600 hover:text-gray-800 font-medium px-4 py-2 rounded-xl hover:bg-white/50 transition-all"
+            className="text-sm text-gray-600 hover:text-gray-800 font-medium px-4 py-2 rounded-xl hover:bg-white/50 transition-all cursor-pointer"
+            type="button"
           >
             Logout
           </button>
@@ -103,6 +108,13 @@ function App() {
       {/* Main content */}
       <div className="flex-1 flex relative overflow-hidden">
         <div className="flex-1 flex flex-col bg-white/30 backdrop-blur-sm">
+          {/* Debug indicator */}
+          {showPanel && (
+            <div className="fixed top-20 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs z-50">
+              Panel: OPEN
+            </div>
+          )}
+          
           {/* Smart Suggestions Banner */}
           <SmartSuggestions user={user} />
           
