@@ -25,6 +25,20 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // Keyboard shortcut to toggle panel (Ctrl+B or Cmd+B)
+    const handleKeyPress = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault();
+        console.log('Keyboard shortcut pressed! Toggling panel');
+        setShowPanel(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  useEffect(() => {
     // Determine check-in type based on time of day
     if (user) {
       const hour = new Date().getHours();
@@ -75,26 +89,48 @@ function App() {
       )}
       
       {/* Header */}
-      <div className="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between shadow-lg">
+      <div className="glass-effect border-b border-white/20 px-6 py-4 flex items-center justify-between shadow-lg relative z-50">
         <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
           <span className="text-3xl">🚀</span>
           Life OS
         </h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative z-50">
           <span className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full font-medium shadow-md">
             Hi, {user?.name} ✨
           </span>
+          
+          {/* Panel Toggle Button - Multiple ways to open */}
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Panel button clicked! Current state:', showPanel);
+                setShowPanel(!showPanel);
+              }}
+              className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer relative"
+              style={{ zIndex: 9999, position: 'relative' }}
+              title="Open Goals & Tools Panel"
+              type="button"
+            >
+              <span className="text-2xl block" style={{ pointerEvents: 'none' }}>🎯</span>
+            </button>
+          </div>
+          
+          {/* Text link as backup */}
           <button
-            onClick={() => {
-              console.log('Panel button clicked! Current state:', showPanel);
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               setShowPanel(!showPanel);
             }}
-            className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer z-50"
-            title="Goals & Tools"
+            className="text-sm font-semibold text-orange-600 hover:text-orange-700 underline cursor-pointer"
             type="button"
+            style={{ zIndex: 9999 }}
           >
-            <span className="text-2xl pointer-events-none">🎯</span>
+            {showPanel ? 'Close Panel' : 'Open Panel'}
           </button>
+          
           <button
             onClick={handleLogout}
             className="text-sm text-gray-600 hover:text-gray-800 font-medium px-4 py-2 rounded-xl hover:bg-white/50 transition-all cursor-pointer"
@@ -123,9 +159,10 @@ function App() {
         
         {/* Side Panel */}
         <div
-          className={`absolute top-0 right-0 h-full w-96 glass-effect border-l border-white/30 shadow-2xl transform transition-transform duration-300 ease-in-out z-10 ${
+          className={`absolute top-0 right-0 h-full w-96 glass-effect border-l border-white/30 shadow-2xl transform transition-transform duration-300 ease-in-out ${
             showPanel ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{ zIndex: 100 }}
         >
           <SidePanel user={user} onClose={() => setShowPanel(false)} />
         </div>
