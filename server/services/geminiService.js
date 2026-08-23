@@ -16,13 +16,14 @@ console.log('✅ Gemini API Key loaded:', `${apiKey.substring(0, 10)}...`);
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // Current supported model names (as of August 2026)
-// Try GA models first, fall back to stable 1.5 models if needed
+// Using the most basic model names that should work
 const SUPPORTED_MODELS = [
-  'gemini-2.5-flash',       // Best balance of speed/intelligence, GA
-  'gemini-2.5-flash-lite',  // Cheaper/faster fallback, GA
-  'gemini-2.5-pro',         // Heaviest fallback, GA
-  'gemini-1.5-flash',       // Stable fallback (in case 2.5 not available yet)
-  'gemini-1.5-pro'          // Last resort
+  'gemini-pro',           // Basic model (might still work)
+  'gemini-1.5-flash',     // Stable flash
+  'gemini-1.5-pro',       // Stable pro
+  'gemini-2.0-flash-exp', // Experimental
+  'gemini-flash',         // Simplified name
+  'gemini'                // Most basic name
 ];
 
 let cachedModel = null;
