@@ -153,7 +153,7 @@ http://localhost:3000
 - **Mongoose** - ODM
 
 ### AI & Services
-- **Google Gemini API** - AI chatbot (FREE)
+- **Groq AI API** for fast and efficient chatbot responses
 - **Speech Recognition API** - Voice input
 - **Speech Synthesis API** - Voice output
 
@@ -251,9 +251,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+### 🚀 Deployment
+
+- **Frontend:** [Live Demo](https://smart-productivity-assistant-1.onrender.com)
+- **Backend:** [Backend API](https://smart-productivity-assistant.onrender.com)
+
+  
+
 ## 🙏 Acknowledgments
 
-- **Google Gemini** for free AI API
+- **Groq AI API** for fast and efficient chatbot responses
 - **MongoDB Atlas** for free database hosting
 - **Tailwind CSS** for beautiful styling
 - **React** community for awesome tools
