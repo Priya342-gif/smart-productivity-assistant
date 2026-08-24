@@ -272,7 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or issues, please:
 - Open an [Issue](https://github.com/Priya342-gif/smart-productivity-assistant/issues)
 - Check the [Documentation](QUICK_START.md)
-- Contact: [chauhanpriya1921@gmail.com]
+- Contact: [chauhanpriya1926@gmail.com]
 
 ---
 
